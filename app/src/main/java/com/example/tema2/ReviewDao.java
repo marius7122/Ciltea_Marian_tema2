@@ -10,19 +10,16 @@ import java.util.List;
 @Dao
 public interface ReviewDao {
 
-    //TODO: remove unwanted code
-
     @Query("SELECT * FROM Review")
     List<Review> getAll();
 
-    /*@Query("SELECT * FROM Review WHERE uid IN (:userIds)")
-    List<Review> loadAllByIds(int[] userIds);*/
 
     @Query("SELECT * FROM Review WHERE TRIM(fullName) LIKE :fullName LIMIT 1")
     Review findByName(String fullName);
 
     @Insert
-    void insertAll(Review... reviews);
+    void insert(Review review);
+
 
     @Delete
     void delete(Review review);

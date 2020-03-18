@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 @Entity
 public class Review {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     public int uid;
 
     @ColumnInfo(name = "FullName")
