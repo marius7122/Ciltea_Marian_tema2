@@ -68,6 +68,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             {
                 mDataset.remove(r);
                 notifyDataSetChanged();
+                break;
             }
         }
     }

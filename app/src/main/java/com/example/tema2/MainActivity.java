@@ -19,6 +19,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView mRecyclerView;
+    MyAdapter mAdapter;
 
     Button newReviewBtn, deleteReviewBtn;
     EditText fullNameEdit, markEdit;
@@ -71,8 +72,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(List<Review> reviews) {
                 super.onPostExecute(reviews);
-                MyAdapter adapter = new MyAdapter(reviews);
-                mRecyclerView.setAdapter(adapter);
+                mAdapter = new MyAdapter(reviews);
+                mRecyclerView.setAdapter(mAdapter);
             }
         }
 
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private void addReview()
     {
         final String fullName = fullNameEdit.getText().toString().trim();
-        final String mark= markEdit.getText().toString().trim();
+        final String mark = markEdit.getText().toString().trim();
 
         if(fullName.isEmpty())
         {
@@ -98,20 +99,19 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        final Review review = new Review(fullName, mark);
         class AddReview extends AsyncTask<Void, Void, Void>
         {
             @Override
             protected Void doInBackground(Void... voids) {
-                Review review = new Review(fullName, mark);
                 DatabaseHandle.getInstance(getApplicationContext()).getAppDatabase().reviewDao().insert(review);
                 return null;
             }
 
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                finish();
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            protected void onPostExecute(Void voids) {
+                super.onPostExecute(voids);
+                mAdapter.addItem(review);
                 Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG).show();
             }
         }
@@ -131,12 +131,13 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        class DeleteReview extends AsyncTask<Void,Void,Void>{
+        class DeleteReview extends AsyncTask<Void,Void,Void> {
             Boolean found = false;
+            Review review;
             @Override
-            protected Void doInBackground(Void...voids){
-                Review review = DatabaseHandle.getInstance(getApplicationContext()).getAppDatabase().reviewDao().findByName(mName);
-                if(review!=null) {
+            protected Void doInBackground(Void... voids){
+                review = DatabaseHandle.getInstance(getApplicationContext()).getAppDatabase().reviewDao().findByName(mName);
+                if(review != null) {
                     this.found = true;
                     DatabaseHandle.getInstance(getApplicationContext()).getAppDatabase().reviewDao().delete(review);
                 }
@@ -144,18 +145,16 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            protected void onPostExecute(Void aVoid){
-                super.onPostExecute(aVoid);
+            protected void onPostExecute(Void voids){
+                super.onPostExecute(voids);
                 if(this.found == true) {
                     Toast.makeText(getApplicationContext(), "Review Deleted!", Toast.LENGTH_LONG).show();
-                    finish();
-                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                    mAdapter.deleteItem(review);
                 }
                 else {
                     markEdit.setText("");
                     Toast.makeText(getApplicationContext(), "Review not found!", Toast.LENGTH_LONG).show();
                 }
-
             }
         }
         DeleteReview deleteReview = new DeleteReview();
